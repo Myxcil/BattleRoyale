@@ -8,9 +8,8 @@
 #include "BRGameMode.generated.h"
 
 class ABRPlane;
-/**
- * 
- */
+
+
 UCLASS()
 class MYBATTLEROYALE_API ABRGameMode : public AGameMode
 {
@@ -18,7 +17,9 @@ class MYBATTLEROYALE_API ABRGameMode : public AGameMode
 
 public:
 	TConstArrayView<APlayerController*> GetPlayerControllers() const { return PlayerControllers; }
-	
+	float GetMatchStartCountdown() const;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
@@ -31,9 +32,8 @@ protected:
 	void SpawnZone();
 	void SpawnPlane();
 
-private:
-	UPROPERTY()
-	TArray<APlayerController*> PlayerControllers;
+	UPROPERTY(Replicated, BlueprintReadOnly, Category="Battle Royale|Basic")
+	float CountdownToMatchStart;
 
 	UPROPERTY(EditAnywhere, Blueprintable, Category="Battle Royale|Basic")
 	int32 MinimumNumberOfPlayersForMatch = 2;
@@ -57,7 +57,11 @@ private:
 	UPROPERTY(EditAnywhere, Blueprintable, Category="Battle Royale|Plane")
 	FName PlaneEndTag = "PlaneEnd";
 
+private:
+	UPROPERTY()
+	TArray<APlayerController*> PlayerControllers;
+
 	FTimerHandle MaxTimeToStartHandle;
 	UPROPERTY()
-	TObjectPtr<ABRZone> CurrentZone;  
+	TObjectPtr<ABRZone> CurrentZone;
 };

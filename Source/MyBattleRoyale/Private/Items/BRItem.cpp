@@ -34,8 +34,10 @@ void ABRItem::BeginPlay()
 		if (UKismetMathLibrary::RandomBool())
 		{
 			const TSubclassOf<ABRItem> RandomItemClass = ChildClasses[UKismetMathLibrary::RandomIntegerInRange(0, ChildClasses.Num()-1)];
-			ABRItem* NewItem = GetWorld()->SpawnActor<ABRItem>(RandomItemClass, GetActorTransform());
-			NewItem->bIsBaseItem = false;
+			if (ABRItem* NewItem = GetWorld()->SpawnActor<ABRItem>(RandomItemClass, GetActorTransform()))
+			{
+				NewItem->bIsBaseItem = false;
+			}
 		}
 		Destroy();
 	}
@@ -52,7 +54,7 @@ void ABRItem::Tick(float DeltaTime)
 
 void ABRItem::OnItemOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (const ABRCharacter* Character = Cast<ABRCharacter>(OtherActor))
+	if (ABRCharacter* Character = Cast<ABRCharacter>(OtherActor))
 	{
 		USkeletalMeshComponent* CharacterMesh = Character->GetMesh();
 		if (Socket != NAME_None && CharacterMesh->DoesSocketExist(Socket))
@@ -62,7 +64,10 @@ void ABRItem::OnItemOverlapped(UPrimitiveComponent* OverlappedComponent, AActor*
 			{
 				StaticMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			}
-			AttachToComponent( CharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Socket);
+			if (AttachToComponent( CharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Socket))
+			{
+				Character->SetEquippedItem(ItemType);
+			}
 		}
 		else
 		{

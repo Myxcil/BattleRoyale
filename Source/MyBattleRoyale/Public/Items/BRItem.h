@@ -11,6 +11,7 @@ class UBoxComponent;
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
+	None,
 	Weapon,
 	Health,
 	Throwable,
@@ -41,7 +42,7 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
-	EItemType ItemType = EItemType::Others;
+	EItemType ItemType = EItemType::None;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
 	bool bIsBaseItem = false;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")

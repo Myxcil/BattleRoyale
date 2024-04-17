@@ -3,6 +3,7 @@
 
 #include "BRCharacter.h"
 
+#include "BRGameMode.h"
 #include "BRPlane.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -15,17 +16,30 @@ ABRCharacter::ABRCharacter()
 	bIsInZone = true;
 }
 
+void ABRCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (GameMode != nullptr)
+	{
+		CountdownToMatchStart = GameMode->GetMatchStartCountdown();
+	}
+}
+
 void ABRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	if (HasAuthority())
 	{
+		const UWorld* World = GetWorld();
+		
 		Health = MaximumHealth;
 		bIsInZone = true;
 		bIsInPlane = false;
 
 		FTimerHandle Temp;
-		GetWorld()->GetTimerManager().SetTimer(Temp, this, &ABRCharacter::ServerDamagePlayerOutsideZone, OutOfZoneDamageInterval, true);
+		World->GetTimerManager().SetTimer(Temp, this, &ABRCharacter::ServerDamagePlayerOutsideZone, OutOfZoneDamageInterval, true);
+
+		GameMode = Cast<ABRGameMode>(World->GetAuthGameMode());
 	}
 }
 
@@ -41,12 +55,20 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABRCharacter, bIsInZone);
 	DOREPLIFETIME(ABRCharacter, Health);
 	DOREPLIFETIME(ABRCharacter, bIsAlive);
+	DOREPLIFETIME(ABRCharacter, EquippedItemType);
+	DOREPLIFETIME(ABRCharacter, CountdownToMatchStart);
 }
+
 
 void ABRCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 	MulticastPlayerLanded();
+}
+
+void ABRCharacter::SetEquippedItem(EItemType ItemType)
+{
+	EquippedItemType = ItemType;
 }
 
 void ABRCharacter::ServerJumpFromPlane_Implementation()

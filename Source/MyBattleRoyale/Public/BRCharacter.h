@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Items/BRItem.h"
 #include "BRCharacter.generated.h"
+
+class ABRGameMode;
 
 UCLASS()
 class MYBATTLEROYALE_API ABRCharacter : public ACharacter
@@ -13,6 +16,8 @@ class MYBATTLEROYALE_API ABRCharacter : public ACharacter
 
 public:
 	ABRCharacter();
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -28,13 +33,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Battle Royale|Health")
 	float GetHealthPercent() const { return Health / MaximumHealth; } 
+
+	void SetEquippedItem(EItemType ItemType);
 	
 protected:
 	virtual void BeginPlay() override;
 	
-	UFUNCTION(BlueprintImplementableEvent, Category="Battle Royale|Plane")
+	UFUNCTION(BlueprintImplementableEvent, Category="Battle Royale|Player")
 	void OnSwitchPlayerViewToPlane();
-	UFUNCTION(BlueprintImplementableEvent, Category="Battle Royale|Plane")
+	UFUNCTION(BlueprintImplementableEvent, Category="Battle Royale|Player")
 	void OnSwitchPlayerViewToCharacter();
 	UFUNCTION(BlueprintImplementableEvent, Category="Battle Royale|Health")
 	void OnPlayerOutOfZoneDamage();
@@ -52,12 +59,16 @@ protected:
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayerLanded();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category="Battle Royale|Plane");
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category="Battle Royale|Player");
+	float CountdownToMatchStart = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category="Battle Royale|Player");
 	bool bIsInPlane = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Zone");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	bool bIsInZone = false;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Zone");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	bool bIsAlive = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
+	EItemType EquippedItemType = EItemType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Health");
 	float OutOfZoneDamageInterval = 1.0f;
@@ -67,6 +78,9 @@ protected:
 	float MaximumHealth = 100.0f;
 
 private:
+	UPROPERTY()
+	TObjectPtr<ABRGameMode> GameMode;
+	
 	UPROPERTY(Replicated)
 	float Health = 0;
 };

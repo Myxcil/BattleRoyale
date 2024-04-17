@@ -7,6 +7,16 @@
 #include "BRPlane.h"
 #include "Kismet/GameplayStatics.h"
 
+float ABRGameMode::GetMatchStartCountdown() const
+{
+	return MaxTimeToStartHandle.IsValid() ? GetWorld()->GetTimerManager().GetTimerRemaining(MaxTimeToStartHandle) : 0;
+}
+
+void ABRGameMode::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
 void ABRGameMode::BeginPlay()
 {
 	Super::BeginPlay();
