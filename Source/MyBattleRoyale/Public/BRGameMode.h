@@ -59,5 +59,5 @@ private:
 
 	FTimerHandle MaxTimeToStartHandle;
 	UPROPERTY()
-	ABRZone* CurrentZone;  
+	TObjectPtr<ABRZone> CurrentZone;  
 };

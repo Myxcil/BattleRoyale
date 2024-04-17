@@ -34,7 +34,7 @@ protected:
 	float AutoEjectPlayers = 10.0f;
 
 	UPROPERTY()
-	const USceneComponent* PlayerSpawn;
+	TObjectPtr<const USceneComponent> PlayerSpawn;
 
 	float TravelTime;
 	FVector StartPoint;

@@ -35,12 +35,11 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
-	UStaticMeshComponent* ZoneMesh;
+	TObjectPtr<UStaticMeshComponent> ZoneMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Battle Royale|Zone");
 	TArray<FZoneInfo> ZoneInfos;
 
 	FVector DefaultScale;
-	
 	int32 ZoneInfoIndex = -1;
 	float CurrentZoneTime = 0.0f;
 	float CurrentScaleFactor = 1.0f;
