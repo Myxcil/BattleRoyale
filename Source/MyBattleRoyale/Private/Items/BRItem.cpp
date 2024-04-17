@@ -5,7 +5,6 @@
 
 #include "BRCharacter.h"
 #include "Components/BoxComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 
 ABRItem::ABRItem()
 {
@@ -28,23 +27,7 @@ void ABRItem::BeginPlay()
 	{
 		return;
 	}
-	
-	if (bIsBaseItem)
-	{
-		if (UKismetMathLibrary::RandomBool())
-		{
-			const TSubclassOf<ABRItem> RandomItemClass = ChildClasses[UKismetMathLibrary::RandomIntegerInRange(0, ChildClasses.Num()-1)];
-			if (ABRItem* NewItem = GetWorld()->SpawnActor<ABRItem>(RandomItemClass, GetActorTransform()))
-			{
-				NewItem->bIsBaseItem = false;
-			}
-		}
-		Destroy();
-	}
-	else
-	{
-		BoxCollider->OnComponentBeginOverlap.AddDynamic(this, &ABRItem::OnItemOverlapped);
-	}
+	BoxCollider->OnComponentBeginOverlap.AddDynamic(this, &ABRItem::OnItemOverlapped);
 }
 
 void ABRItem::Tick(float DeltaTime)
@@ -66,7 +49,7 @@ void ABRItem::OnItemOverlapped(UPrimitiveComponent* OverlappedComponent, AActor*
 			}
 			if (AttachToComponent( CharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, Socket))
 			{
-				Character->SetEquippedItem(ItemType);
+				Character->SetEquippedItem(this);
 			}
 		}
 		else

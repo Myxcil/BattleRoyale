@@ -6,7 +6,6 @@
 ABRItemWeapon::ABRItemWeapon()
 {
 	ItemType = EItemType::Weapon;
-	bIsBaseItem = false;
 	Socket = "RHand";
 }
 

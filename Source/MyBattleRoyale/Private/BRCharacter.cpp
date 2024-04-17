@@ -28,6 +28,7 @@ void ABRCharacter::Tick(float DeltaSeconds)
 void ABRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	if (HasAuthority())
 	{
 		const UWorld* World = GetWorld();
@@ -55,7 +56,6 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABRCharacter, bIsInZone);
 	DOREPLIFETIME(ABRCharacter, Health);
 	DOREPLIFETIME(ABRCharacter, bIsAlive);
-	DOREPLIFETIME(ABRCharacter, EquippedItemType);
 	DOREPLIFETIME(ABRCharacter, CountdownToMatchStart);
 }
 
@@ -66,9 +66,9 @@ void ABRCharacter::Landed(const FHitResult& Hit)
 	MulticastPlayerLanded();
 }
 
-void ABRCharacter::SetEquippedItem(EItemType ItemType)
+void ABRCharacter::SetEquippedItem(ABRItem* Item)
 {
-	EquippedItemType = ItemType;
+	EquippedItem = Item;
 }
 
 void ABRCharacter::ServerJumpFromPlane_Implementation()

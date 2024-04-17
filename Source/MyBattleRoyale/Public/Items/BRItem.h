@@ -19,6 +19,14 @@ enum class EItemType : uint8
 	Others,
 };
 
+UENUM(BlueprintType)
+enum class EHoldPose : uint8
+{
+	None,
+	Pistol,
+	Rifle,
+};
+
 UCLASS()
 class MYBATTLEROYALE_API ABRItem : public AActor
 {
@@ -44,9 +52,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
 	EItemType ItemType = EItemType::None;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
-	bool bIsBaseItem = false;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
-	TArray<TSubclassOf<ABRItem>> ChildClasses;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
 	FName Socket = NAME_None;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
+	EHoldPose Pose = EHoldPose::None;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
+	float MaxSpeedScale = 1.0f;
 };

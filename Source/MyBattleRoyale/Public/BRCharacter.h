@@ -34,7 +34,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Battle Royale|Health")
 	float GetHealthPercent() const { return Health / MaximumHealth; } 
 
-	void SetEquippedItem(EItemType ItemType);
+	void SetEquippedItem(ABRItem* Item);
 	
 protected:
 	virtual void BeginPlay() override;
@@ -67,8 +67,8 @@ protected:
 	bool bIsInZone = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	bool bIsAlive = true;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
-	EItemType EquippedItemType = EItemType::None;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Battle Royale|Player");
+	TObjectPtr<ABRItem> EquippedItem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Health");
 	float OutOfZoneDamageInterval = 1.0f;
@@ -80,7 +80,6 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<ABRGameMode> GameMode;
-	
 	UPROPERTY(Replicated)
 	float Health = 0;
 };
