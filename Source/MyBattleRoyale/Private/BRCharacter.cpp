@@ -11,6 +11,21 @@
 ABRCharacter::ABRCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bIsInZone = true;
+}
+
+void ABRCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	if (HasAuthority())
+	{
+		Health = MaximumHealth;
+		bIsInZone = true;
+		bIsInPlane = false;
+
+		FTimerHandle Temp;
+		GetWorld()->GetTimerManager().SetTimer(Temp, this, &ABRCharacter::ServerDamagePlayerOutsideZone, OutOfZoneDamageInterval, true);
+	}
 }
 
 void ABRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -22,6 +37,8 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ABRCharacter, bIsInPlane);
+	DOREPLIFETIME(ABRCharacter, bIsInZone);
+	DOREPLIFETIME(ABRCharacter, Health);
 }
 
 void ABRCharacter::ServerJumpFromPlane_Implementation()
@@ -49,6 +66,16 @@ void ABRCharacter::ServerSwitchPlayerViewToPlane_Implementation()
 	}
 }
 
+void ABRCharacter::ServerDamagePlayerOutsideZone_Implementation()
+{
+	if (!bIsInZone && !bIsInPlane)
+	{
+		Health -= OutOfZoneDamageAmount;
+		Health = FMath::Clamp(Health, 0.0f, 100.0f);
+		ClientDamagePlayerLocally();
+	}
+}
+
 void ABRCharacter::ClientSwitchPlayerViewToPlane_Implementation()
 {
 	OnSwitchPlayerViewToPlane();
@@ -58,4 +85,10 @@ void ABRCharacter::ClientSwitchPlayerViewToCharacter_Implementation()
 {
 	OnSwitchPlayerViewToCharacter();
 }
+
+void ABRCharacter::ClientDamagePlayerLocally_Implementation()
+{
+	OnPlayerOutOfZoneDamage();
+}
+
 
