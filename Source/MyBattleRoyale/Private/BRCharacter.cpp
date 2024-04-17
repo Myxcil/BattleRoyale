@@ -6,6 +6,7 @@
 #include "BRGameMode.h"
 #include "BRPlane.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Items/BRItemWeapon.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -57,6 +58,7 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABRCharacter, Health);
 	DOREPLIFETIME(ABRCharacter, bIsAlive);
 	DOREPLIFETIME(ABRCharacter, CountdownToMatchStart);
+	DOREPLIFETIME(ABRCharacter, HoldPose);
 }
 
 
@@ -66,9 +68,25 @@ void ABRCharacter::Landed(const FHitResult& Hit)
 	MulticastPlayerLanded();
 }
 
+float ABRCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	if (HasAuthority())
+	{
+		Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaximumHealth);
+		if (Health <= 0)
+		{
+			bIsAlive = false;
+			MulticastPlayerDeath();
+		}
+	}
+	ClientDamagePlayerLocally();
+	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
 void ABRCharacter::SetEquippedItem(ABRItem* Item)
 {
 	EquippedItem = Item;
+	HoldPose = EquippedItem ? EquippedItem->GetHoldPose() : EHoldPose::None;
 }
 
 void ABRCharacter::ServerJumpFromPlane_Implementation()
@@ -101,13 +119,47 @@ void ABRCharacter::ServerDamagePlayerOutsideZone_Implementation()
 {
 	if (!bIsInZone && bIsAlive)
 	{
-		Health = FMath::Clamp(Health - OutOfZoneDamageAmount, 0.0f, MaximumHealth);
-		if (Health <= 0)
+		UGameplayStatics::ApplyDamage(this, OutOfZoneDamageAmount, nullptr, nullptr, UDamageType::StaticClass());
+	}
+}
+
+void ABRCharacter::ServerShootWeapon_Implementation()
+{
+	if (EquippedItem && EquippedItem->GetItemType() == EItemType::Weapon)
+	{
+		if (ABRItemWeapon* Weapon = Cast<ABRItemWeapon>(EquippedItem))
 		{
-			bIsAlive = false;
-			MulticastPlayerDeath();
+			const FTransform MuzzleTransform = Weapon->GetMuzzleTransform();
+			const FVector Forward = MuzzleTransform.GetRotation().GetForwardVector();
+			const FVector StartLocation = MuzzleTransform.GetLocation() + Forward * 5.0f;
+			const FVector EndLocation = StartLocation + Forward * 3000.0f;
+
+			FHitResult LocalHitResult;
+			const UWorld* World = GetWorld();
+			if (World->LineTraceSingleByChannel(LocalHitResult, StartLocation, EndLocation, ECC_Visibility))
+			{
+				UKismetSystemLibrary::DrawDebugLine(World, StartLocation, EndLocation, FLinearColor::Red, 5);
+				UKismetSystemLibrary::DrawDebugSphere(World, LocalHitResult.Location, 50.0f, 12, FLinearColor::Red, 5);
+				if (LocalHitResult.GetActor())
+				{
+					if (ABRCharacter* Target = Cast<ABRCharacter>(LocalHitResult.GetActor()))
+					{
+						if (Target != this)
+						{
+							float LocalDamage = 5.0f;
+							if (LocalHitResult.BoneName == "head")
+							{
+								LocalDamage *= 1.5f;
+							}
+					
+							UGameplayStatics::ApplyPointDamage(Target, LocalDamage, StartLocation, LocalHitResult, GetController(), this, UDamageType::StaticClass());
+						}
+					}
+				}
+			}
+
+			Weapon->MulticastShoot();
 		}
-		ClientDamagePlayerLocally();
 	}
 }
 
@@ -150,4 +202,3 @@ void ABRCharacter::MulticastPlayerLanded_Implementation()
 	Movement->AirControl = 0.36f;
 	Movement->GravityScale = 1.75f;
 }
-

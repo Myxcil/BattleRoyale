@@ -36,6 +36,11 @@ public:
 	ABRItem();
 	virtual void Tick(float DeltaTime) override;
 
+	EItemType GetItemType() const { return ItemType; }
+	EHoldPose GetHoldPose() const { return Pose; }
+	UStaticMeshComponent* GetStaticMesh() const { return StaticMesh; }
+	USkeletalMeshComponent* GetSkeletalMesh() const { return SkeletalMesh; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -49,12 +54,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMesh;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Item")
 	EItemType ItemType = EItemType::None;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Item")
 	FName Socket = NAME_None;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Item")
 	EHoldPose Pose = EHoldPose::None;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
-	float MaxSpeedScale = 1.0f;
 };

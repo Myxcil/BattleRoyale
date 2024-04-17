@@ -16,12 +16,14 @@ AItemSpawner::AItemSpawner()
 void AItemSpawner::BeginPlay()
 {
 	Super::BeginPlay();
-	if (Chance >= 1.0f || UKismetMathLibrary::RandomFloat() <= Chance)
+	if (HasAuthority())
 	{
-		const TSubclassOf<ABRItem> RandomItemClass = ChildClasses[UKismetMathLibrary::RandomIntegerInRange(0, ChildClasses.Num()-1)];
-		if (ABRItem* NewItem = GetWorld()->SpawnActor<ABRItem>(RandomItemClass, GetActorTransform()))
+		if (Chance >= 1.0f || UKismetMathLibrary::RandomFloat() <= Chance)
 		{
+			const TSubclassOf<ABRItem> RandomItemClass = ChildClasses[UKismetMathLibrary::RandomIntegerInRange(0, ChildClasses.Num()-1)];
+			if (ABRItem* NewItem = GetWorld()->SpawnActor<ABRItem>(RandomItemClass, GetActorTransform()))
+			{
+			}
 		}
 	}
-	Destroy();
 }

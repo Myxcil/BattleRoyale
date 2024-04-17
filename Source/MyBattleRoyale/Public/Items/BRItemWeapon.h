@@ -13,6 +13,18 @@ class MYBATTLEROYALE_API ABRItemWeapon : public ABRItem
 
 public:
 	ABRItemWeapon();
+
+	FTransform GetMuzzleTransform() const;
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastShoot();
 	
+protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
+	TObjectPtr<UParticleSystem> MuzzleParticles;
+
+private:
+	bool bUpdateMuzzle = false;
 };

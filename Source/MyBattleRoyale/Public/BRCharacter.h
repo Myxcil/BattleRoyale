@@ -23,6 +23,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void Landed(const FHitResult& Hit) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION(Server,Reliable)
 	void ServerSwitchPlayerViewToPlane();
@@ -30,6 +31,8 @@ public:
 	void ServerJumpFromPlane();
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Battle Royale|Health")
 	void ServerDamagePlayerOutsideZone();
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
+	void ServerShootWeapon();
 
 	UFUNCTION(BlueprintCallable, Category="Battle Royale|Health")
 	float GetHealthPercent() const { return Health / MaximumHealth; } 
@@ -67,8 +70,8 @@ protected:
 	bool bIsInZone = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	bool bIsAlive = true;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Battle Royale|Player");
-	TObjectPtr<ABRItem> EquippedItem;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
+	EHoldPose HoldPose = EHoldPose::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Health");
 	float OutOfZoneDamageInterval = 1.0f;
@@ -80,6 +83,9 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<ABRGameMode> GameMode;
+	UPROPERTY();
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
+	TObjectPtr<ABRItem> EquippedItem;
 	UPROPERTY(Replicated)
 	float Health = 0;
 };
