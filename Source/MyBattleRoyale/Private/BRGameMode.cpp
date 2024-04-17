@@ -5,7 +5,6 @@
 
 #include "BRCharacter.h"
 #include "BRPlane.h"
-#include "EntitySystem/MovieSceneEntitySystemRunner.h"
 #include "Kismet/GameplayStatics.h"
 
 void ABRGameMode::BeginPlay()

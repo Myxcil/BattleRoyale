@@ -37,10 +37,21 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category="Battle Royale|Health")
 	void OnPlayerOutOfZoneDamage();
 
+	UFUNCTION(Client, Reliable)
+	void ClientSwitchPlayerViewToPlane();
+	UFUNCTION(Client, Reliable)
+	void ClientSwitchPlayerViewToCharacter();
+	UFUNCTION(Client, Unreliable)
+	void ClientDamagePlayerLocally();
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayerDeath();
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category="Battle Royale|Plane");
 	bool bIsInPlane = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Zone");
 	bool bIsInZone = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Zone");
+	bool bIsAlive = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Health");
 	float OutOfZoneDamageInterval = 1.0f;
@@ -48,13 +59,6 @@ protected:
 	float OutOfZoneDamageAmount = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Health");
 	float MaximumHealth = 100.0f;
-
-	UFUNCTION(Client, Reliable)
-	void ClientSwitchPlayerViewToPlane();
-	UFUNCTION(Client, Reliable)
-	void ClientSwitchPlayerViewToCharacter();
-	UFUNCTION(Client, Unreliable)
-	void ClientDamagePlayerLocally();
 
 private:
 	UPROPERTY(Replicated)

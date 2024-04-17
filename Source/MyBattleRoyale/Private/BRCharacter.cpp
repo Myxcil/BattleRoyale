@@ -3,7 +3,6 @@
 
 #include "BRCharacter.h"
 
-#include "BRGameMode.h"
 #include "BRPlane.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -39,6 +38,7 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABRCharacter, bIsInPlane);
 	DOREPLIFETIME(ABRCharacter, bIsInZone);
 	DOREPLIFETIME(ABRCharacter, Health);
+	DOREPLIFETIME(ABRCharacter, bIsAlive);
 }
 
 void ABRCharacter::ServerJumpFromPlane_Implementation()
@@ -68,9 +68,14 @@ void ABRCharacter::ServerSwitchPlayerViewToPlane_Implementation()
 
 void ABRCharacter::ServerDamagePlayerOutsideZone_Implementation()
 {
-	if (!bIsInZone && !bIsInPlane)
+	if (!bIsInZone && bIsAlive)
 	{
 		Health = FMath::Clamp(Health - OutOfZoneDamageAmount, 0.0f, MaximumHealth);
+		if (Health <= 0)
+		{
+			bIsAlive = false;
+			MulticastPlayerDeath();
+		}
 		ClientDamagePlayerLocally();
 	}
 }
@@ -90,4 +95,10 @@ void ABRCharacter::ClientDamagePlayerLocally_Implementation()
 	OnPlayerOutOfZoneDamage();
 }
 
-
+void ABRCharacter::MulticastPlayerDeath_Implementation()
+{
+	USkeletalMeshComponent* CharacterMesh = GetMesh();
+	check(CharacterMesh);
+	CharacterMesh->SetCollisionProfileName(TEXT("Ragdoll"));
+	CharacterMesh->SetSimulatePhysics(true);
+}
