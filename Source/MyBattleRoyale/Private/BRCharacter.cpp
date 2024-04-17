@@ -24,6 +24,10 @@ void ABRCharacter::Tick(float DeltaSeconds)
 	{
 		CountdownToMatchStart = GameMode->GetMatchStartCountdown();
 	}
+	if (HasAuthority() || IsLocallyControlled())
+	{
+		AimRotation = GetController()->GetControlRotation();
+	}
 }
 
 void ABRCharacter::BeginPlay()
@@ -59,6 +63,7 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABRCharacter, bIsAlive);
 	DOREPLIFETIME(ABRCharacter, CountdownToMatchStart);
 	DOREPLIFETIME(ABRCharacter, HoldPose);
+	DOREPLIFETIME_CONDITION(ABRCharacter, AimRotation, COND_SkipOwner);
 }
 
 
@@ -131,7 +136,7 @@ void ABRCharacter::ServerShootWeapon_Implementation()
 		{
 			const FTransform MuzzleTransform = Weapon->GetMuzzleTransform();
 			const FVector Forward = MuzzleTransform.GetRotation().GetForwardVector();
-			const FVector StartLocation = MuzzleTransform.GetLocation() + Forward * 5.0f;
+			const FVector StartLocation = MuzzleTransform.GetLocation() + Forward * 10.0f;
 			const FVector EndLocation = StartLocation + Forward * 3000.0f;
 
 			FHitResult LocalHitResult;

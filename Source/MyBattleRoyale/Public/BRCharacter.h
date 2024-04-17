@@ -72,6 +72,8 @@ protected:
 	bool bIsAlive = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	EHoldPose HoldPose = EHoldPose::None;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
+	FRotator AimRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Health");
 	float OutOfZoneDamageInterval = 1.0f;
