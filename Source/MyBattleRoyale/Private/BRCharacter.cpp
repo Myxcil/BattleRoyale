@@ -70,8 +70,7 @@ void ABRCharacter::ServerDamagePlayerOutsideZone_Implementation()
 {
 	if (!bIsInZone && !bIsInPlane)
 	{
-		Health -= OutOfZoneDamageAmount;
-		Health = FMath::Clamp(Health, 0.0f, 100.0f);
+		Health = FMath::Clamp(Health - OutOfZoneDamageAmount, 0.0f, MaximumHealth);
 		ClientDamagePlayerLocally();
 	}
 }
