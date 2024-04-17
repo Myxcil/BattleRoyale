@@ -17,6 +17,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void Landed(const FHitResult& Hit) override;
+
 	UFUNCTION(Server,Reliable)
 	void ServerSwitchPlayerViewToPlane();
 	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Battle Royale|Plane")
@@ -45,7 +47,11 @@ protected:
 	void ClientDamagePlayerLocally();
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayerDeath();
-
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayerSkydiving();
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayerLanded();
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Replicated, Category="Battle Royale|Plane");
 	bool bIsInPlane = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Zone");

@@ -4,7 +4,10 @@
 #include "BRCharacter.h"
 
 #include "BRPlane.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMaterialLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 ABRCharacter::ABRCharacter()
@@ -41,6 +44,12 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABRCharacter, bIsAlive);
 }
 
+void ABRCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+	MulticastPlayerLanded();
+}
+
 void ABRCharacter::ServerJumpFromPlane_Implementation()
 {
 	if (bIsInPlane)
@@ -53,6 +62,7 @@ void ABRCharacter::ServerJumpFromPlane_Implementation()
 			Plane->GetPlayerSpawnPosition(Pos, Rot);
 			SetActorLocationAndRotation(Pos, Rot, false, nullptr, ETeleportType::ResetPhysics);
 			ClientSwitchPlayerViewToCharacter();
+			MulticastPlayerSkydiving();
 		}
 	}
 }
@@ -102,3 +112,21 @@ void ABRCharacter::MulticastPlayerDeath_Implementation()
 	CharacterMesh->SetCollisionProfileName(TEXT("Ragdoll"));
 	CharacterMesh->SetSimulatePhysics(true);
 }
+
+void ABRCharacter::MulticastPlayerSkydiving_Implementation()
+{
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	check(Movement);
+	Movement->Velocity = UKismetMathLibrary::VLerp(FVector::ZeroVector, GetVelocity(), 0.1f);
+	Movement->AirControl = 0.7f;
+	Movement->GravityScale = 0.1f;
+}
+
+void ABRCharacter::MulticastPlayerLanded_Implementation()
+{
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	check(Movement);
+	Movement->AirControl = 0.36f;
+	Movement->GravityScale = 1.75f;
+}
+
