@@ -30,6 +30,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void OnItemOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
 	TObjectPtr<UBoxComponent> BoxCollider;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
@@ -43,4 +46,6 @@ protected:
 	bool bIsBaseItem = false;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
 	TArray<TSubclassOf<ABRItem>> ChildClasses;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
+	FName Socket = NAME_None;
 };
