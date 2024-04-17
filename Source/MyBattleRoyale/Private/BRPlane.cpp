@@ -3,6 +3,8 @@
 
 #include "BRPlane.h"
 
+#include "BRCharacter.h"
+#include "BRGameMode.h"
 #include "Kismet/KismetMathLibrary.h"
 
 ABRPlane::ABRPlane()
@@ -12,6 +14,7 @@ ABRPlane::ABRPlane()
 	SetRootComponent(PlaneMesh);
 	bReplicates = true;
 	TravelTime = -1.0f;
+	bPlayersEjected = false;
 	AActor::SetReplicateMovement(true);
 }
 
@@ -23,15 +26,22 @@ void ABRPlane::BeginPlay()
 void ABRPlane::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	if (TravelTime >= 0 && TravelTime <= TravelDuration)
+	if (HasAuthority())
 	{
-		const float T = TravelTime / TravelDuration;
-		const FVector Position = FMath::Lerp(StartPoint, EndPoint, T);
-		SetActorLocation(Position);
-		TravelTime += DeltaTime;
-		if (TravelTime > TravelDuration)
+		if (TravelTime >= 0 && TravelTime <= TravelDuration)
 		{
-			Destroy();
+			const float T = TravelTime / TravelDuration;
+			const FVector Position = FMath::Lerp(StartPoint, EndPoint, T);
+			SetActorLocation(Position);
+			TravelTime += DeltaTime;
+			if (!bPlayersEjected && TravelTime >= (TravelDuration - AutoEjectPlayers))
+			{
+				DropPlayersFromPlane();
+			}				
+			if (TravelTime > TravelDuration)
+			{
+				Destroy();
+			}
 		}
 	}
 }
@@ -43,3 +53,33 @@ void ABRPlane::SetEndPoint(const FVector& End)
 	TravelTime = 0.0f;
 	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(StartPoint, EndPoint));
 }
+
+void ABRPlane::GetPlayerSpawnPosition(FVector& OutPosition, FRotator& OutRotator) const
+{
+	if (PlayerSpawn)
+	{
+		OutPosition = PlayerSpawn->GetComponentLocation();
+		OutRotator = PlayerSpawn->GetComponentRotation();
+	}
+	else
+	{
+		OutPosition = GetActorLocation() - FVector(0,0,5000);
+		OutRotator = GetActorRotation() + FRotator(0,180,0);
+	}
+}
+
+void ABRPlane::DropPlayersFromPlane()
+{
+	if (const ABRGameMode* GameMode = Cast<ABRGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		for(auto& Controller : GameMode->GetPlayerControllers())
+		{
+			if (ABRCharacter* Character = Cast<ABRCharacter>(Controller->GetPawn()))
+			{
+				Character->ServerJumpFromPlane();
+			}
+		}
+	}
+	bPlayersEjected = true;
+}
+

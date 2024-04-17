@@ -16,6 +16,9 @@ class MYBATTLEROYALE_API ABRGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
+public:
+	TConstArrayView<APlayerController*> GetPlayerControllers() const { return PlayerControllers; }
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
@@ -27,7 +30,7 @@ protected:
 	
 	void SpawnZone();
 	void SpawnPlane();
-	
+
 private:
 	UPROPERTY()
 	TArray<APlayerController*> PlayerControllers;

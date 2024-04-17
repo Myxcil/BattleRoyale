@@ -14,17 +14,25 @@ class MYBATTLEROYALE_API ABRCharacter : public ACharacter
 public:
 	ABRCharacter();
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(Server,Reliable)
 	void ServerSwitchPlayerViewToPlane();
 
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category="Battle Royale|Plane")
+	void ServerJumpFromPlane();
+
 	UFUNCTION(BlueprintImplementableEvent, Category="Battle Royale|Plane")
 	void OnSwitchPlayerViewToPlane();
+	UFUNCTION(BlueprintImplementableEvent, Category="Battle Royale|Plane")
+	void OnSwitchPlayerViewToCharacter();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Battle Royale|Plane");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Plane");
 	bool bIsInPlane = false;
 
 protected:
 	UFUNCTION(Client, Reliable)
 	void ClientSwitchPlayerViewToPlane();
+	UFUNCTION(Client, Reliable)
+	void ClientSwitchPlayerViewToCharacter();
 };
