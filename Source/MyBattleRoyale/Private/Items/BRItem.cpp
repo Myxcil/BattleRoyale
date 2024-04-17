@@ -3,6 +3,7 @@
 
 #include "Items/BRItem.h"
 
+#include "BRCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -27,6 +28,7 @@ void ABRItem::BeginPlay()
 	{
 		return;
 	}
+	
 	if (bIsBaseItem)
 	{
 		if (UKismetMathLibrary::RandomBool())
@@ -37,10 +39,22 @@ void ABRItem::BeginPlay()
 		}
 		Destroy();
 	}
+	else
+	{
+		BoxCollider->OnComponentBeginOverlap.AddDynamic(this, &ABRItem::OnItemOverlapped);
+	}
 }
 
 void ABRItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ABRItem::OnItemOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (ABRCharacter* Character = Cast<ABRCharacter>(OtherActor))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Item Overlap!"));
+	}
 }
 
