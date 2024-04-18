@@ -33,6 +33,8 @@ public:
 	void ServerDamagePlayerOutsideZone();
 	UFUNCTION(Server, Unreliable, BlueprintCallable)
 	void ServerShootWeapon();
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
+	void ServerAim(const bool bSetAiming);
 
 	UFUNCTION(BlueprintCallable, Category="Battle Royale|Health")
 	float GetHealthPercent() const { return Health / MaximumHealth; } 
@@ -74,6 +76,8 @@ protected:
 	EHoldPose HoldPose = EHoldPose::None;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	FRotator AimRotation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
+	bool bIsAiming = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Health");
 	float OutOfZoneDamageInterval = 1.0f;

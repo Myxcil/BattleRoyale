@@ -64,6 +64,7 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABRCharacter, CountdownToMatchStart);
 	DOREPLIFETIME(ABRCharacter, HoldPose);
 	DOREPLIFETIME_CONDITION(ABRCharacter, AimRotation, COND_SkipOwner);
+	DOREPLIFETIME(ABRCharacter, bIsAiming);
 }
 
 
@@ -206,4 +207,16 @@ void ABRCharacter::MulticastPlayerLanded_Implementation()
 	check(Movement);
 	Movement->AirControl = 0.36f;
 	Movement->GravityScale = 1.75f;
+}
+
+void ABRCharacter::ServerAim_Implementation(const bool bSetAiming)
+{
+	if (EquippedItem && EquippedItem->GetItemType() == EItemType::Weapon)
+	{
+		bIsAiming = bSetAiming;
+	}
+	else
+	{
+		bIsAiming = false;
+	}
 }
