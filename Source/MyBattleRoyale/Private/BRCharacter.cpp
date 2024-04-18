@@ -62,7 +62,7 @@ void ABRCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(ABRCharacter, Health);
 	DOREPLIFETIME(ABRCharacter, bIsAlive);
 	DOREPLIFETIME(ABRCharacter, CountdownToMatchStart);
-	DOREPLIFETIME(ABRCharacter, HoldPose);
+	DOREPLIFETIME(ABRCharacter, EquippedItem);
 	DOREPLIFETIME_CONDITION(ABRCharacter, AimRotation, COND_SkipOwner);
 	DOREPLIFETIME(ABRCharacter, bIsAiming);
 }
@@ -92,7 +92,6 @@ float ABRCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 void ABRCharacter::SetEquippedItem(ABRItem* Item)
 {
 	EquippedItem = Item;
-	HoldPose = EquippedItem ? EquippedItem->GetHoldPose() : EHoldPose::None;
 }
 
 void ABRCharacter::ServerJumpFromPlane_Implementation()
@@ -163,10 +162,27 @@ void ABRCharacter::ServerShootWeapon_Implementation()
 					}
 				}
 			}
+			else
+			{
+				UKismetSystemLibrary::DrawDebugLine(World, StartLocation, EndLocation, FLinearColor::Yellow, 5);
+			}
 
 			Weapon->MulticastShoot();
 		}
 	}
+}
+
+void ABRCharacter::ServerAim_Implementation(const bool bSetAiming)
+{
+	if (EquippedItem && EquippedItem->GetItemType() == EItemType::Weapon)
+	{
+		bIsAiming = bSetAiming;
+	}
+	else
+	{
+		bIsAiming = false;
+	}
+	ClientAim(bIsAiming);
 }
 
 void ABRCharacter::ClientSwitchPlayerViewToPlane_Implementation()
@@ -182,6 +198,27 @@ void ABRCharacter::ClientSwitchPlayerViewToCharacter_Implementation()
 void ABRCharacter::ClientDamagePlayerLocally_Implementation()
 {
 	OnPlayerOutOfZoneDamage();
+}
+
+void ABRCharacter::ClientAim_Implementation(const bool bSetAiming)
+{
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (bSetAiming)
+		{
+			if (EquippedItem && EquippedItem->GetItemType() == EItemType::Weapon)
+			{
+				if (ABRItemWeapon* Weapon = Cast<ABRItemWeapon>(EquippedItem))
+				{
+					PlayerController->SetViewTarget(Weapon);	
+				}
+			}
+		}
+		else
+		{
+			PlayerController->SetViewTarget(this);
+		}
+	}
 }
 
 void ABRCharacter::MulticastPlayerDeath_Implementation()
@@ -207,16 +244,4 @@ void ABRCharacter::MulticastPlayerLanded_Implementation()
 	check(Movement);
 	Movement->AirControl = 0.36f;
 	Movement->GravityScale = 1.75f;
-}
-
-void ABRCharacter::ServerAim_Implementation(const bool bSetAiming)
-{
-	if (EquippedItem && EquippedItem->GetItemType() == EItemType::Weapon)
-	{
-		bIsAiming = bSetAiming;
-	}
-	else
-	{
-		bIsAiming = false;
-	}
 }

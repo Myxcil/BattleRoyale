@@ -40,6 +40,8 @@ public:
 	float GetHealthPercent() const { return Health / MaximumHealth; } 
 
 	void SetEquippedItem(ABRItem* Item);
+	UFUNCTION(BlueprintCallable, Category="Battle Royale|Item")
+	const ABRItem* GetEquippedItem() const { return EquippedItem; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -57,6 +59,9 @@ protected:
 	void ClientSwitchPlayerViewToCharacter();
 	UFUNCTION(Client, Unreliable)
 	void ClientDamagePlayerLocally();
+	UFUNCTION(Client, Reliable)
+	void ClientAim(const bool bSetAiming);
+
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulticastPlayerDeath();
 	UFUNCTION(NetMulticast, Unreliable)
@@ -73,8 +78,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	bool bIsAlive = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
-	EHoldPose HoldPose = EHoldPose::None;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	FRotator AimRotation;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Battle Royale|Player");
 	bool bIsAiming = false;
@@ -89,8 +92,7 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<ABRGameMode> GameMode;
-	UPROPERTY();
-	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
+	UPROPERTY(Replicated);
 	TObjectPtr<ABRItem> EquippedItem;
 	UPROPERTY(Replicated)
 	float Health = 0;

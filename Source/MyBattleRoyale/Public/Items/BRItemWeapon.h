@@ -6,6 +6,8 @@
 #include "BRItem.h"
 #include "BRItemWeapon.generated.h"
 
+class UCameraComponent;
+
 UCLASS()
 class MYBATTLEROYALE_API ABRItemWeapon : public ABRItem
 {
@@ -22,8 +24,11 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Battle Royale|Item")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Battle Royale|Item")
 	TObjectPtr<UParticleSystem> MuzzleParticles;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components")
+	TObjectPtr<UCameraComponent> AimCamera;
 
 private:
 	bool bUpdateMuzzle = false;

@@ -3,6 +3,7 @@
 
 #include "Items/BRItemWeapon.h"
 
+#include "Camera/CameraComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 namespace
@@ -14,6 +15,10 @@ ABRItemWeapon::ABRItemWeapon()
 {
 	ItemType = EItemType::Weapon;
 	Socket = "RHand";
+	AimCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("AimCamera"));
+	AimCamera->SetupAttachment(SkeletalMesh);
+	constexpr float GizmoScale = 0.1f;
+	AimCamera->SetWorldScale3D(FVector(GizmoScale,GizmoScale,GizmoScale));
 }
 
 FTransform ABRItemWeapon::GetMuzzleTransform() const
